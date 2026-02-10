@@ -1,44 +1,36 @@
-name: Build and Deploy to GitHub Pages
-
+name: Build and Deploy to rehydratedwater.com
 on:
   push:
     branches:
       - main
-
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
-
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
-
       - name: Get dependencies
         run: flutter pub get
-
       - name: Build web app
-        run: flutter build web --release
-
+        run: flutter build web --base-href "/game/2048/" --release
       - name: Checkout target repo
         uses: actions/checkout@v4
         with:
-          repository: qizheYang/qizheYang.github.io
+          repository: qizheYang/rehydratedwater.com
           token: ${{ secrets.DEPLOY_TOKEN }}
           path: target-repo
-
       - name: Deploy to target repo
         run: |
-          rm -rf target-repo/public/game/2048
-          cp -r build/web target-repo/public/game/2048
+          rm -rf target-repo/game/2048
+          cp -r build/web target-repo/game/2048
           cd target-repo
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git add public/game/2048
+          git add game/2048
           git commit -m "Auto-deploy 2048 from 2048_VibeCoding" || echo "No changes to commit"
           git push
